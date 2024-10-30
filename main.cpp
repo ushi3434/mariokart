@@ -21,6 +21,9 @@ int main(void)
 
 }
 
+//ƒxƒNƒgƒ‹‘€ì
+
+
 void rotateVec2(VEC2& vec2,float rad)
 {
 	VEC2 temp = vec2;

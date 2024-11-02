@@ -78,19 +78,17 @@ char displayBuffer[WINDOW_HEIGHT][WINDOW_WIDTH] = {};
 // ==============================================
 // プロトタイプ宣言
 // ==============================================
+void Initialize(void);
 void UpdateScreen(void);
 void OutputChar(char);
+float CalcPerspective(float, float);
 
 // ==============================================
 // main関数（エントリーポイント）
 // ==============================================
 int main(void)
 {
-	for (int i = 0; i < WINDOW_HEIGHT; i++)
-		for (int j = 0; j < WINDOW_WIDTH; j++)
-			displayData[i][j] = TILE_MAX;
-
-	DeleteCursor();
+	Initialize();
 
 	while (true)
 	{
@@ -106,6 +104,13 @@ int main(void)
 				player.angle -= M_PI / 180;
 				break;
 
+			case 'i':
+				player.altitude += 0.01f;
+				break;
+
+			case 'k':
+				player.altitude -= 0.01f;
+				break;
 			}
 		}
 
@@ -115,6 +120,19 @@ int main(void)
 		//フレーム調整
 		Sleep(16);
 	}
+
+}
+
+// ==============================================
+// 初期化関数
+// ==============================================
+void Initialize(void)
+{
+	for (int i = 0; i < WINDOW_HEIGHT; i++)
+		for (int j = 0; j < WINDOW_WIDTH; j++)
+			displayData[i][j] = TILE_MAX;
+
+	DeleteCursor();
 
 }
 
@@ -139,11 +157,11 @@ void UpdateScreen()
 		for (int j = 0; j < WINDOW_WIDTH; j++)
 		{
 			float horizontalPos = (float)j / WINDOW_WIDTH;
-			float verticalPos = (float)i / WINDOW_HEIGHT;
+			float verticalPos =  - (float)(i - WINDOW_HEIGHT) / WINDOW_HEIGHT;
 
 			Cursor = Vec2_Add(
-				Vec2_Multiply(fovEdgeLeft, verticalPos * (1 - horizontalPos)),
-				Vec2_Multiply(fovEdgeRight, verticalPos * horizontalPos));
+				Vec2_Multiply(fovEdgeLeft, CalcPerspective(verticalPos,player.altitude) * (1 - horizontalPos)),
+				Vec2_Multiply(fovEdgeRight, CalcPerspective(verticalPos, player.altitude) * horizontalPos));
 
 			Cursor = Vec2_Add(Cursor, player.pos);
 
@@ -163,6 +181,14 @@ void UpdateScreen()
 			}
 		}
 	}
+}
+
+// ==============================================
+// 遠近法を計算する関数
+// ==============================================
+float CalcPerspective(float verticalPos, float altitude)
+{
+	return altitude / (1 - verticalPos);
 }
 
 // ==============================================
